@@ -1,20 +1,27 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from "react";
+import { initDB, insertQuestions } from "./database/db";
+import QuizScreen from "./screens/QuizScreen";
+import { TriviaSettings } from "./services/TriviaApi";
+import { SettingsScreen } from "./screens/SettingsScreen";
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+  const [settings, setSettings] = useState<TriviaSettings | null>(null);
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+  if (!settings) {
+    return <SettingsScreen onStart={setSettings} />;
+  }
+
+  // useEffect(() => {
+  //   const setupDatabase = async () => {
+  //     try {
+  //       await initDB();
+  //       await insertQuestions();
+  //     } catch (error) {
+  //       console.log("DB error:", error);
+  //     }
+  //   };
+  //   setupDatabase();
+  // }, []);
+
+  return <QuizScreen />;
+}
