@@ -1,20 +1,22 @@
-import { useEffect, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  Button,
-  StyleSheet,
-  SafeAreaView,
-  Animated,
-} from 'react-native';
-import { db, saveHighScore } from '../database/db';
-import { Question, ShuffledQuestion } from '../types/Question';
-import ResultScreen from './ResultScreen';
+import { useEffect, useRef, useState } from "react";
+import { View, Text, StyleSheet, Animated } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { saveHighScore } from "../database/db";
+import { ShuffledQuestion } from "../types/Question";
+import ResultScreen from "./ResultScreen";
+import { fetchTriviaQuestions, TriviaSettings } from "../services/TriviaApi";
+import { prepareApiQuestions } from "../utils/quizUtils";
+import { StyledButton } from "../components/StyledButton";
+import { COLORS } from "../constants/ui";
 
 const QUESTION_TIME = 10;
-const MAX_QUESTIONS = 10;
 
-export default function QuizScreen() {
+type QuizScreenProps = {
+  settings: TriviaSettings;
+  onBack: () => void;
+};
+
+export const QuizScreen = ({ settings, onBack }: QuizScreenProps) => {
   const [questions, setQuestions] = useState<ShuffledQuestion[]>([]);
   const [index, setIndex] = useState<number>(0);
   const [score, setScore] = useState<number>(0);
@@ -27,17 +29,29 @@ export default function QuizScreen() {
   const progressAnim = useRef(new Animated.Value(1)).current;
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
-    const loadQuestions = async () => {
-      try {
-        const result = await db.getAllAsync('SELECT * FROM questions');
-      const preparedQuestions = prepareQuestions(result as Question[]);
-      setQuestions(preparedQuestions);
-      } catch (error: any) {
-        console.error('Error:', error);
-      }
-    };
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [startTime] = useState(Date.now());
 
+  const loadQuestions = async (): Promise<void> => {
+    try {
+      setIsLoading(true);
+      setErrorMessage("");
+
+      const result = await fetchTriviaQuestions(settings);
+      const preparedQuestions = prepareApiQuestions(result);
+
+      setQuestions(preparedQuestions);
+    } catch (error: any) {
+      setErrorMessage(
+        error.message || "Küsimusi ei leidnud. Proovi midagi teist",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadQuestions();
   }, []);
 
@@ -45,7 +59,6 @@ export default function QuizScreen() {
     if (questions.length > 0 && !quizFinished) {
       startTimer();
     }
-
     return () => {
       stopTimer();
     };
@@ -55,16 +68,32 @@ export default function QuizScreen() {
     const saveResult = async () => {
       if (quizFinished && questions.length > 0 && !resultSaved) {
         try {
-          await saveHighScore(score, questions.length);
+          const duration = Math.floor((Date.now() - startTime) / 1000);
+
+          await saveHighScore(
+            score,
+            questions.length,
+            score, // correctAnswers
+            wrongAnswers,
+            duration,
+            settings.username,
+          );
           setResultSaved(true);
         } catch (error) {
-          console.error('Error saving high score:', error);
+          console.error("Error saving high score:", error);
         }
       }
     };
-
     saveResult();
-  }, [quizFinished, resultSaved, score, questions.length]);
+  }, [
+    quizFinished,
+    resultSaved,
+    score,
+    wrongAnswers,
+    questions.length,
+    startTime,
+    settings.username,
+  ]);
 
   const stopTimer = (): void => {
     if (intervalRef.current) {
@@ -98,110 +127,65 @@ export default function QuizScreen() {
     }, 1000);
   };
 
-  const goToNextQuestion = (): void => {
+  const handleTimeout = async (): Promise<void> => {
+    setUnansweredAnswers((prev) => prev + 1);
+
     if (index < questions.length - 1) {
       setIndex((prev) => prev + 1);
     } else {
-      setQuizFinished(true);
+      await finishQuiz(score);
     }
   };
 
-const handleTimeout = async (): Promise<void> => {
-  setUnansweredAnswers((prev) => prev + 1);
-
-  if (index < questions.length - 1) {
-    setIndex((prev) => prev + 1);
-  } else {
-    await finishQuiz(score);
-  }
-};
-
-const answer = async (selected: string): Promise<void> => {
-  stopTimer();
-
-  const current = questions[index];
-  const isCorrect = selected === current.correct;
-  const finalScore = isCorrect ? score + 1 : score;
-
-  if (isCorrect) {
-    setScore((prev) => prev + 1);
-  } else {
-    setWrongAnswers((prev) => prev + 1);
-  }
-
-  if (index < questions.length - 1) {
-    setIndex((prev) => prev + 1);
-  } else {
-    await finishQuiz(finalScore);
-  }
-};
-
-  const shuffleArray = <T,>(array: T[]): T[] => {
-    const shuffled = [...array];
-
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-
-    return shuffled;
-  };
-
-    const prepareQuestions = (data: Question[]): ShuffledQuestion[] => {
-      const uniqueQuestions = data.filter(
-        (item, index, self) =>
-          index === self.findIndex((q) => q.question === item.question)
-      );
-
-      const mapped = uniqueQuestions.map((item) => ({
-        id: item.id,
-        question: item.question,
-        correct: item.correct,
-        options: shuffleArray([item.optionA, item.optionB, item.optionC]),
-      }));
-
-      const shuffledQuestions = shuffleArray(mapped);
-
-      return shuffledQuestions.slice(0, MAX_QUESTIONS);
-    };
-const finishQuiz = async (finalScore: number): Promise<void> => {
-  stopTimer();
-
-//   try {
-//     await saveHighScore(finalScore, questions.length);
-//   } catch (error) {
-//     console.error('Error saving high score:', error);
-//   }
-
-  setScore(finalScore);
-  setQuizFinished(true);
-};
-
-  const restartQuiz = async (): Promise<void> =>{
+  const answer = async (selected: string): Promise<void> => {
     stopTimer();
 
-      try {
-        const result = await db.getAllAsync('SELECT * FROM questions');
-        const preparedQuestions = prepareQuestions(result as Question[]);
-        setQuestions(preparedQuestions);
-      } catch (error: any) {
-        console.error('Error:', error);
-      }
+    const current = questions[index];
+    const isCorrect = selected === current.correct;
+    const finalScore = isCorrect ? score + 1 : score;
 
-    setIndex(0);
-    setScore(0);
-    setWrongAnswers(0);
-    setUnansweredAnswers(0);
-    setQuizFinished(false);
-    setTimeLeft(QUESTION_TIME);
-    progressAnim.setValue(1);
-    setResultSaved(false);
+    if (isCorrect) {
+      setScore((prev) => prev + 1);
+    } else {
+      setWrongAnswers((prev) => prev + 1);
+    }
+
+    if (index < questions.length - 1) {
+      setIndex((prev) => prev + 1);
+    } else {
+      await finishQuiz(finalScore);
+    }
   };
 
-  if (questions.length === 0) {
+  const finishQuiz = async (finalScore: number): Promise<void> => {
+    stopTimer();
+
+    setScore(finalScore);
+    setQuizFinished(true);
+  };
+
+  if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
         <Text style={styles.loading}>Laadingut...</Text>
+      </SafeAreaView>
+    );
+  }
+  if (errorMessage) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          <Text style={styles.errorTitle}>Küsimusi ei leitud</Text>
+          <Text style={styles.errorText}>{errorMessage}</Text>
+          <Text style={styles.errorHint}>
+            Proovi valida kategooria Any, raskusaste Any või tüüp Any.
+          </Text>
+          <StyledButton
+            title="Tagasi seadetesse"
+            onPress={onBack}
+            style={styles.backButton}
+          />
+        </View>
       </SafeAreaView>
     );
   }
@@ -214,7 +198,7 @@ const finishQuiz = async (finalScore: number): Promise<void> => {
         correctAnswers={score}
         wrongAnswers={wrongAnswers}
         unansweredAnswers={unansweredAnswers}
-        onRestart={restartQuiz}
+        onRestart={onBack}
       />
     );
   }
@@ -223,7 +207,7 @@ const finishQuiz = async (finalScore: number): Promise<void> => {
 
   const progressWidth = progressAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['0%', '100%'],
+    outputRange: ["0%", "100%"],
   });
 
   return (
@@ -233,12 +217,7 @@ const finishQuiz = async (finalScore: number): Promise<void> => {
           Question {index + 1} / {questions.length}
         </Text>
 
-        <Text
-          style={[
-            styles.timerText,
-            timeLeft <= 3 && styles.timerWarning,
-          ]}
-        >
+        <Text style={[styles.timerText, timeLeft <= 3 && styles.timerWarning]}>
           Time left: {timeLeft}s
         </Text>
 
@@ -247,23 +226,27 @@ const finishQuiz = async (finalScore: number): Promise<void> => {
             style={[styles.progressBarFill, { width: progressWidth }]}
           />
         </View>
-
-        <Text style={styles.question}>{current.question}</Text>
-
+        <View style={styles.questionContainer}>
+          <Text style={styles.question}>{current.question}</Text>
+        </View>
         {current.options.map((option, optionIndex) => (
           <View key={optionIndex} style={styles.buttonWrapper}>
-            <Button title={option} onPress={() => answer(option)} />
+            <StyledButton
+              title={option}
+              onPress={() => answer(option)}
+              style={styles.answerButton}
+            />
           </View>
         ))}
       </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.PRIMARY_BACKGROUND,
   },
   content: {
     flex: 1,
@@ -272,44 +255,73 @@ const styles = StyleSheet.create({
   },
   loading: {
     marginTop: 50,
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 18,
   },
   counter: {
     fontSize: 16,
     marginBottom: 10,
-    textAlign: 'center',
-    color: '#666',
+    textAlign: "center",
+    color: COLORS.SUBTITLE_TEXT,
   },
   timerText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 10,
-    textAlign: 'center',
-    color: '#222',
+    textAlign: "center",
+    color: COLORS.PRIMARY_TEXT,
   },
   timerWarning: {
-    color: 'red',
+    color: COLORS.PRIMARY_RED,
   },
   progressBarBackground: {
     height: 10,
-    backgroundColor: '#ddd',
+    backgroundColor: COLORS.SECONDARY_BACKGROUND,
     borderRadius: 999,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginBottom: 30,
   },
   progressBarFill: {
-    height: '100%',
-    backgroundColor: '#2196F3',
-    borderRadius: 999,
+    height: "100%",
+    backgroundColor: COLORS.PRIMARY_ACTIVE_BUTTON,
+    borderRadius: 14,
   },
   question: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 30,
-    textAlign: 'center',
+    textAlign: "center",
+    color: COLORS.PRIMARY_TEXT,
+  },
+  questionContainer: {
+    minHeight: 120,
+    justifyContent: "center",
+    marginBottom: 30,
   },
   buttonWrapper: {
     marginBottom: 15,
+  },
+  errorTitle: {
+    fontSize: 26,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  errorText: {
+    fontSize: 16,
+    textAlign: "center",
+    color: COLORS.PRIMARY_RED,
+    marginBottom: 10,
+  },
+  errorHint: {
+    fontSize: 15,
+    textAlign: "center",
+    color: COLORS.PRIMARY_RED,
+  },
+  backButton: {
+    marginTop: 24,
+  },
+  answerButton: {
+    width: "100%",
   },
 });

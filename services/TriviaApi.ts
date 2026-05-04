@@ -1,7 +1,7 @@
-export const difficulties = ["", "Easy", "Medium", "Hard"] as const;
+export const difficulties = ["", "easy", "medium", "hard"] as const;
 export type TriviaDifficulty = (typeof difficulties)[number];
 
-export const questionTypes = ["", "Multiple", "Boolean"] as const;
+export const questionTypes = ["", "multiple", "boolean"] as const;
 export type TriviaType = (typeof questionTypes)[number];
 
 export type TriviaSettings = {
@@ -9,6 +9,7 @@ export type TriviaSettings = {
   category: string;
   difficulty: TriviaDifficulty;
   type: TriviaType;
+  username: string;
 };
 
 export type ApiQuestion = {

@@ -4,7 +4,7 @@ import {
   questionTypes,
   TriviaSettings,
 } from "../services/TriviaApi";
-import { StyleSheet, Text, ScrollView, View } from "react-native";
+import { StyleSheet, Text, ScrollView, View, TextInput } from "react-native";
 import { NumberInput } from "../components/NumberInput";
 import { StyledButton } from "../components/StyledButton";
 import {
@@ -30,9 +30,11 @@ export const SettingsScreen = ({ onStart }: SettingsScreenProps) => {
   const [category, setCategory] = useState("");
 
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [username, setUsername] = useState("");
 
   const startQuiz = () => {
     onStart({
+      username: username.trim() || "Anonymous",
       amount: Number(amount),
       category,
       difficulty,
@@ -69,6 +71,13 @@ export const SettingsScreen = ({ onStart }: SettingsScreenProps) => {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>QuizApp</Text>
       <Text style={styles.subtitle}>Vali viktoriini seaded</Text>
+      <Text style={styles.label}>Kasutaja nimi</Text>
+      <TextInput
+        style={styles.input}
+        value={username}
+        onChangeText={setUsername}
+        placeholder="Sisesta nimi"
+      />
       <Text style={styles.label}>Küsimuste arv</Text>
       <NumberInput value={amount} onChange={setAmount} />
 
@@ -77,7 +86,7 @@ export const SettingsScreen = ({ onStart }: SettingsScreenProps) => {
         {difficulties.map((item) => (
           <OptionButton
             key={item || "any"}
-            label={item}
+            label={item ? item[0].toUpperCase() + item.slice(1) : "Any"}
             selected={difficulty === item}
             onPress={() => handleDifficultyChange(item)}
           />
@@ -89,7 +98,7 @@ export const SettingsScreen = ({ onStart }: SettingsScreenProps) => {
         {questionTypes.map((item) => (
           <OptionButton
             key={item || "any"}
-            label={item}
+            label={item ? item[0].toUpperCase() + item.slice(1) : "Any"}
             selected={type === item}
             onPress={() => handleTypeChange(item)}
           />
@@ -162,6 +171,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.SECONDARY_BACKGROUND,
     borderRadius: 14,
     overflow: "hidden",
+    marginBottom: 16,
+  },
+  input: {
     marginBottom: 16,
   },
 });
