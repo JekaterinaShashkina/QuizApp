@@ -20,8 +20,8 @@ type HighScore = {
   score: number;
   totalQuestions: number;
   percentage: number;
-  correctAnswer: number;
-  wrongAnswer: number;
+  correctAnswers: number;
+  wrongAnswers: number;
   duration: number;
   createdAt: string;
 };

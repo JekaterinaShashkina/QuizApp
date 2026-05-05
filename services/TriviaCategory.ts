@@ -11,7 +11,7 @@ export const fetchTriviaCategories = async (): Promise<TriviaCategory[]> => {
   const response = await fetch("https://opentdb.com/api_category.php");
 
   if (!response.ok) {
-    throw new Error("Failed to load categories");
+    throw new Error("Kategooriate laadimine ebaõnnestus.");
   }
 
   const data: CategoriesResponse = await response.json();

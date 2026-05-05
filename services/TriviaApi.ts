@@ -26,6 +26,14 @@ type TriviaApiResponse = {
   results: ApiQuestion[];
 };
 
+const responseCodeMessages: Record<number, string> = {
+  1: "Valitud seadistusega ei leitud piisavalt küsimusi.",
+  2: "Viktoriini seadistus on vigane. Küsimuste arv peab olema 1-50.",
+  3: "OpenTDB sessiooni tokenit ei leitud.",
+  4: "OpenTDB sessiooni küsimused on otsas.",
+  5: "OpenTDB piirab päringuid. Oota hetk ja proovi uuesti.",
+};
+
 export const fetchTriviaQuestions = async (
   settings: TriviaSettings,
 ): Promise<ApiQuestion[]> => {
@@ -50,13 +58,15 @@ export const fetchTriviaQuestions = async (
   );
 
   if (!response.ok) {
-    throw new Error("Failed to load questions");
+    throw new Error("Küsimuste laadimine ebaõnnestus.");
   }
 
   const data: TriviaApiResponse = await response.json();
 
   if (data.response_code !== 0) {
-    throw new Error("No questions found for these settings");
+    throw new Error(
+      responseCodeMessages[data.response_code] || "Küsimusi ei leitud.",
+    );
   }
 
   return data.results;

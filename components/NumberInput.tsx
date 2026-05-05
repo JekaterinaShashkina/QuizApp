@@ -4,11 +4,27 @@ import { COLORS } from "../constants/ui";
 type NumberInputProps = {
   value: number;
   onChange: (val: number) => void;
+  min?: number;
+  max?: number;
 };
 
-export const NumberInput = ({ value, onChange }: NumberInputProps) => {
-  const increase = () => onChange(value + 1);
-  const decrease = () => onChange(value > 1 ? value - 1 : 1);
+export const NumberInput = ({
+  value,
+  onChange,
+  min = 1,
+  max = 50,
+}: NumberInputProps) => {
+  const updateValue = (nextValue: number) => {
+    if (Number.isNaN(nextValue)) {
+      return;
+    }
+
+    const clampedValue = Math.min(Math.max(nextValue, min), max);
+    onChange(clampedValue);
+  };
+
+  const increase = () => updateValue(value + 1);
+  const decrease = () => updateValue(value - 1);
 
   return (
     <View style={styles.container}>
@@ -20,10 +36,7 @@ export const NumberInput = ({ value, onChange }: NumberInputProps) => {
         style={styles.input}
         value={String(value)}
         keyboardType="number-pad"
-        onChangeText={(text) => {
-          const num = Number(text);
-          if (!isNaN(num)) onChange(num);
-        }}
+        onChangeText={(text) => updateValue(Number(text))}
       />
 
       <Pressable style={styles.button} onPress={increase}>

@@ -45,7 +45,7 @@ export const QuizScreen = ({ settings, onBack }: QuizScreenProps) => {
       setQuestions(preparedQuestions);
     } catch (error: any) {
       setErrorMessage(
-        error.message || "Küsimusi ei leidnud. Proovi midagi teist",
+        error.message || "Küsimusi ei leitud. Proovi teisi seadeid.",
       );
     } finally {
       setIsLoading(false);
@@ -168,7 +168,7 @@ export const QuizScreen = ({ settings, onBack }: QuizScreenProps) => {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.loading}>Laadingut...</Text>
+        <Text style={styles.loading}>Laadimine...</Text>
       </SafeAreaView>
     );
   }
@@ -226,11 +226,11 @@ export const QuizScreen = ({ settings, onBack }: QuizScreenProps) => {
       </View>
       <View style={styles.content}>
         <Text style={styles.counter}>
-          Question {index + 1} / {questions.length}
+          Küsimus: {index + 1} / {questions.length}
         </Text>
 
         <Text style={[styles.timerText, timeLeft <= 3 && styles.timerWarning]}>
-          Time left: {timeLeft}s
+          Aega jäänud: {timeLeft}s
         </Text>
 
         <View style={styles.progressBarBackground}>

@@ -12,12 +12,37 @@ export const shuffleArray = <T>(array: T[]): T[] => {
   return shuffled;
 };
 
+const htmlEntities: Record<string, string> = {
+  amp: "&",
+  quot: '"',
+  apos: "'",
+  ldquo: '"',
+  rdquo: '"',
+  lsquo: "'",
+  rsquo: "'",
+  eacute: "é",
+  Eacute: "É",
+  uuml: "ü",
+  Uuml: "Ü",
+  ouml: "ö",
+  Ouml: "Ö",
+  auml: "ä",
+  Auml: "Ä",
+  nbsp: " ",
+};
+
 export const decodeText = (text: string): string => {
-  return text
-    .replace(/&quot;/g, '"')
-    .replace(/&#039;/g, "'")
-    .replace(/&amp;/g, "&")
-    .replace(/&eacute;/g, "é");
+  return text.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (match, entity) => {
+    if (entity.startsWith("#x")) {
+      return String.fromCodePoint(parseInt(entity.slice(2), 16));
+    }
+
+    if (entity.startsWith("#")) {
+      return String.fromCodePoint(parseInt(entity.slice(1), 10));
+    }
+
+    return htmlEntities[entity] || match;
+  });
 };
 
 export const prepareApiQuestions = (

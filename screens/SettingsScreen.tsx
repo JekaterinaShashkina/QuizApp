@@ -80,7 +80,7 @@ export const SettingsScreen = ({ onStart }: SettingsScreenProps) => {
         placeholderTextColor={COLORS.PLACEHOLDER}
       />
       <Text style={styles.label}>Küsimuste arv</Text>
-      <NumberInput value={amount} onChange={setAmount} />
+      <NumberInput value={amount} onChange={setAmount} min={1} max={50} />
 
       <Text style={styles.label}>Raskusteaste</Text>
       <View style={styles.row}>
