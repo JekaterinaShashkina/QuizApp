@@ -3,7 +3,7 @@ import * as SQLite from "expo-sqlite";
 export const db = SQLite.openDatabaseSync("quiz.db");
 
 export const initDB = async (): Promise<void> => {
-  await db.execAsync(`DROP TABLE IF EXISTS high_scores;`);
+  // await db.execAsync(`DROP TABLE IF EXISTS high_scores;`);
 
   await db.execAsync(`
       CREATE TABLE IF NOT EXISTS high_scores (
@@ -50,7 +50,7 @@ export const saveHighScore = async (
 export const getHighScores = async () => {
   return await db.getAllAsync(
     `SELECT * FROM high_scores
-     ORDER BY percentage DESC, score DESC, createdAt ASC
+     ORDER BY percentage DESC, score DESC, duration ASC
      LIMIT 5`,
   );
 };

@@ -77,6 +77,7 @@ export const SettingsScreen = ({ onStart }: SettingsScreenProps) => {
         value={username}
         onChangeText={setUsername}
         placeholder="Sisesta nimi"
+        placeholderTextColor={COLORS.PLACEHOLDER}
       />
       <Text style={styles.label}>Küsimuste arv</Text>
       <NumberInput value={amount} onChange={setAmount} />
@@ -174,6 +175,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   input: {
-    marginBottom: 16,
+    width: "80%",
+    backgroundColor: COLORS.SECONDARY_BACKGROUND,
+    borderWidth: 1,
+    borderColor: COLORS.PRIMARY_BORDER,
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: COLORS.PRIMARY_TEXT,
+    marginTop: 8,
+    marginBottom: 20,
   },
 });

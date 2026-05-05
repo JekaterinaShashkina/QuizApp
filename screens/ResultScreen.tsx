@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { getHighScores } from '../database/db';
+import { useEffect, useState } from "react";
+import { View, Text, StyleSheet, Pressable } from "react-native";
+import { getHighScores } from "../database/db";
+import { StyledButton } from "../components/StyledButton";
+import { COLORS } from "../constants/ui";
 
 type ResultsScreenProps = {
   score: number;
@@ -8,14 +10,19 @@ type ResultsScreenProps = {
   correctAnswers: number;
   wrongAnswers: number;
   unansweredAnswers: number;
+  duration: number;
   onRestart: () => void;
 };
 
 type HighScore = {
   id: number;
+  username: string;
   score: number;
   totalQuestions: number;
   percentage: number;
+  correctAnswer: number;
+  wrongAnswer: number;
+  duration: number;
   createdAt: string;
 };
 
@@ -25,6 +32,7 @@ export default function ResultsScreen({
   correctAnswers,
   wrongAnswers,
   unansweredAnswers,
+  duration,
   onRestart,
 }: ResultsScreenProps) {
   const [highScores, setHighScores] = useState<HighScore[]>([]);
@@ -37,7 +45,7 @@ export default function ResultsScreen({
         const result = await getHighScores();
         setHighScores(result as HighScore[]);
       } catch (error) {
-        console.error('Error loading high scores:', error);
+        console.error("Error loading high scores:", error);
       }
     };
 
@@ -60,6 +68,7 @@ export default function ResultsScreen({
         <Text style={styles.statText}>Valed vastused: {wrongAnswers}</Text>
         <Text style={styles.statText}>Vastamata: {unansweredAnswers}</Text>
         <Text style={styles.statText}>Kokku küsimusi: {totalQuestions}</Text>
+        <Text style={styles.statText}>Aeg: {duration} s</Text>
       </View>
 
       <Text style={styles.highScoreTitle}>Parimad tulemused</Text>
@@ -70,18 +79,23 @@ export default function ResultsScreen({
         ) : (
           highScores.map((item, index) => (
             <View key={item.id} style={styles.row}>
-              <Text style={styles.rowText}>
-                {index + 1}. {item.score}/{item.totalQuestions}
+              <Text style={styles.nameText}>
+                {index + 1}. {item.username || "Anonymous"}
               </Text>
-              <Text style={styles.rowText}>{item.percentage}%</Text>
+              <Text style={styles.scoreText}>
+                {item.score}/{item.totalQuestions}
+              </Text>
+              <Text style={styles.durationText}>{item.duration}s</Text>
+              <Text style={styles.percentText}>{item.percentage}%</Text>
             </View>
           ))
         )}
       </View>
-
-      <Pressable style={styles.button} onPress={onRestart}>
-        <Text style={styles.buttonText}>Alusta uuesti</Text>
-      </Pressable>
+      <StyledButton
+        title="Alusta uuesti"
+        onPress={onRestart}
+        style={styles.button}
+      />
     </View>
   );
 }
@@ -89,76 +103,99 @@ export default function ResultsScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
+    backgroundColor: COLORS.PRIMARY_BACKGROUND,
+    justifyContent: "center",
     paddingHorizontal: 24,
   },
   title: {
     fontSize: 32,
-    fontWeight: '700',
-    textAlign: 'center',
+    fontWeight: "700",
+    textAlign: "center",
     marginBottom: 30,
+    color: COLORS.PRIMARY_TEXT,
   },
   card: {
-    backgroundColor: '#f3f7ff',
-    borderRadius: 16,
+    backgroundColor: COLORS.SELECTED_BACKGROUND,
+    borderRadius: 20,
     paddingVertical: 30,
     paddingHorizontal: 20,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 25,
   },
   mainResult: {
     fontSize: 36,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 8,
+    color: COLORS.PRIMARY_TEXT,
   },
   percent: {
     fontSize: 24,
-    color: '#2563eb',
-    fontWeight: '600',
+    color: COLORS.PRIMARY_ACTIVE_BUTTON,
+    fontWeight: "700",
   },
   statsBox: {
-    backgroundColor: '#f8f8f8',
-    borderRadius: 16,
+    backgroundColor: COLORS.SECONDARY_BACKGROUND,
+    borderRadius: 20,
     padding: 20,
     marginBottom: 20,
   },
   statText: {
-    fontSize: 18,
+    fontSize: 17,
     marginBottom: 10,
+    color: COLORS.PRIMARY_TEXT,
   },
   highScoreTitle: {
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 12,
+    color: COLORS.PRIMARY_TEXT,
   },
   highScoreBox: {
-    backgroundColor: '#f8f8f8',
-    borderRadius: 16,
+    backgroundColor: COLORS.SECONDARY_BACKGROUND,
+    borderRadius: 20,
     padding: 16,
     marginBottom: 24,
   },
   emptyText: {
     fontSize: 16,
-    color: '#666',
+    color: COLORS.SUBTITLE_TEXT,
   },
   row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 12,
   },
-  rowText: {
-    fontSize: 17,
+  placeText: {
+    width: 26,
+    fontSize: 16,
+    color: COLORS.PRIMARY_TEXT,
+  },
+  nameText: {
+    width: 105,
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.PRIMARY_TEXT,
+  },
+  scoreText: {
+    flex: 0.7,
+    fontSize: 16,
+    textAlign: "center",
+    color: COLORS.PRIMARY_TEXT,
+  },
+  durationText: {
+    flex: 0.7,
+    fontSize: 16,
+    textAlign: "center",
+    color: COLORS.SUBTITLE_TEXT,
+  },
+  percentText: {
+    flex: 0.7,
+    fontSize: 16,
+    textAlign: "right",
+    fontWeight: "700",
+    color: COLORS.PRIMARY_ACTIVE_BUTTON,
   },
   button: {
-    backgroundColor: '#2563eb',
-    paddingVertical: 16,
-    borderRadius: 12,
-  },
-  buttonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontSize: 18,
-    fontWeight: '600',
+    width: "100%",
   },
 });

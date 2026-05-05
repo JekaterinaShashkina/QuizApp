@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { View, Text, StyleSheet, Animated } from "react-native";
+import { View, Text, StyleSheet, Animated, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { saveHighScore } from "../database/db";
 import { ShuffledQuestion } from "../types/Question";
@@ -8,6 +8,7 @@ import { fetchTriviaQuestions, TriviaSettings } from "../services/TriviaApi";
 import { prepareApiQuestions } from "../utils/quizUtils";
 import { StyledButton } from "../components/StyledButton";
 import { COLORS } from "../constants/ui";
+import { Ionicons } from "@expo/vector-icons";
 
 const QUESTION_TIME = 10;
 
@@ -174,6 +175,11 @@ export const QuizScreen = ({ settings, onBack }: QuizScreenProps) => {
   if (errorMessage) {
     return (
       <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Pressable onPress={onBack}>
+            <Ionicons name="arrow-back" size={26} color={COLORS.PRIMARY_TEXT} />
+          </Pressable>
+        </View>
         <View style={styles.content}>
           <Text style={styles.errorTitle}>Küsimusi ei leitud</Text>
           <Text style={styles.errorText}>{errorMessage}</Text>
@@ -198,6 +204,7 @@ export const QuizScreen = ({ settings, onBack }: QuizScreenProps) => {
         correctAnswers={score}
         wrongAnswers={wrongAnswers}
         unansweredAnswers={unansweredAnswers}
+        duration={Math.floor((Date.now() - startTime) / 1000)}
         onRestart={onBack}
       />
     );
@@ -212,6 +219,11 @@ export const QuizScreen = ({ settings, onBack }: QuizScreenProps) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Pressable onPress={onBack}>
+          <Ionicons name="arrow-back" size={26} color={COLORS.PRIMARY_TEXT} />
+        </Pressable>
+      </View>
       <View style={styles.content}>
         <Text style={styles.counter}>
           Question {index + 1} / {questions.length}
@@ -323,5 +335,15 @@ const styles = StyleSheet.create({
   },
   answerButton: {
     width: "100%",
+  },
+  header: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+    zIndex: 10,
+  },
+  backText: {
+    fontSize: 24,
+    color: COLORS.PRIMARY_TEXT,
   },
 });
