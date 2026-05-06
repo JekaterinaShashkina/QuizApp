@@ -63,12 +63,30 @@ Seejärel:
 
 ## Kasutamine
 
-1. Sisesta kasutajanimi
+1. Sisesta kasutajanimi max 12 tähti
 2. Vali viktoriini parameetrid
 3. Vajuta "Alusta viktoriini"
 4. Vasta küsimustele enne aja lõppu
 5. Vaata tulemust ja edetabelit
 6. Vajuta "Alusta uuesti", et minna tagasi seadistuste juurde
+
+## Screenid ja video
+
+### Seade ekraan
+
+<img src="assets/ScreenShots/SettingsScreen.png" width="250">
+
+### Küsimuste ekraan
+
+<img src="assets/ScreenShots/QuizScreen.png" width="250">
+
+### Tulemuste ekraan
+
+<img src="assets/ScreenShots/TulemusteScreen.png" width="250">
+
+### Vaata DEMO
+
+![Video](https://img.youtube.com/vi/KJelbHIq0yQ/0.jpg)(https://youtube.com/shorts/KJelbHIq0yQ?feature=share)
 
 ## Märkused
 
