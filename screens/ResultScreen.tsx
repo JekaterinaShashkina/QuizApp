@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
 import { getHighScores } from "../database/db";
 import { StyledButton } from "../components/StyledButton";
 import { COLORS } from "../constants/ui";
@@ -11,6 +11,7 @@ type ResultsScreenProps = {
   wrongAnswers: number;
   unansweredAnswers: number;
   duration: number;
+  resultSaved: boolean;
   onRestart: () => void;
 };
 
@@ -32,6 +33,7 @@ export default function ResultsScreen({
   correctAnswers,
   wrongAnswers,
   unansweredAnswers,
+  resultSaved,
   duration,
   onRestart,
 }: ResultsScreenProps) {
@@ -50,10 +52,10 @@ export default function ResultsScreen({
     };
 
     loadHighScores();
-  }, [score, totalQuestions]);
+  }, [score, totalQuestions, resultSaved]);
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Tulemused</Text>
 
       <View style={styles.card}>
@@ -96,15 +98,16 @@ export default function ResultsScreen({
         onPress={onRestart}
         style={styles.button}
       />
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: COLORS.PRIMARY_BACKGROUND,
-    justifyContent: "center",
+    paddingTop: 70,
+    paddingBottom: 50,
     paddingHorizontal: 24,
   },
   title: {
@@ -117,7 +120,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.SELECTED_BACKGROUND,
     borderRadius: 20,
-    paddingVertical: 30,
+    paddingVertical: 20,
     paddingHorizontal: 20,
     alignItems: "center",
     marginBottom: 25,
@@ -171,25 +174,25 @@ const styles = StyleSheet.create({
     color: COLORS.PRIMARY_TEXT,
   },
   nameText: {
-    width: 105,
+    width: 150,
     fontSize: 16,
     fontWeight: "600",
     color: COLORS.PRIMARY_TEXT,
   },
   scoreText: {
-    flex: 0.7,
+    flex: 0.4,
     fontSize: 16,
     textAlign: "center",
     color: COLORS.PRIMARY_TEXT,
   },
   durationText: {
-    flex: 0.7,
+    flex: 0.4,
     fontSize: 16,
     textAlign: "center",
     color: COLORS.SUBTITLE_TEXT,
   },
   percentText: {
-    flex: 0.7,
+    flex: 0.4,
     fontSize: 16,
     textAlign: "right",
     fontWeight: "700",

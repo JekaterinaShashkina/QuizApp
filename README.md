@@ -2,15 +2,30 @@
 
 React Native / Expo viktoriinirakendus, mis kasutab Open Trivia Database API-t.
 
+## Kirjeldus
+
+Rakendus võimaldab kasutajal seadistada viktoriini (küsimuste arv, kategooria, raskusaste ja tüüp), vastata küsimustele ajapiiranguga ning näha oma tulemust koos edetabeliga.
+
+Küsimused laetakse reaalajas OpenTDB API-st ning tulemused salvestatakse lokaalselt SQLite andmebaasi.
+
 ## Funktsionaalsus
 
-- Laeb küsimused OpenTDB API-st.
-- Võimaldab valida kasutajanime, küsimuste arvu, kategooria, raskusastme ja küsimuse tüübi.
-- Kuvab iga küsimuse jaoks vastusevariandid juhuslikus järjekorras.
-- Loeb õiged, valed ja vastamata vastused.
-- Kasutab iga küsimuse jaoks 10-sekundilist taimerit koos edenemisribaga.
-- Salvestab tulemused Expo SQLite andmebaasi.
-- Kuvab parimate tulemuste edetabeli protsendi, punktide ja aja järgi.
+- Küsimuste laadimine Open Trivia Database API-st
+- Viktoriini seadistamine:
+  - kasutajanimi
+  - küsimuste arv
+  - kategooria
+  - raskusaste (easy, medium, hard)
+  - küsimuse tüüp (multiple, boolean)
+- Vastuste juhuslik segamine
+- 10-sekundiline taimer iga küsimuse jaoks koos progressiribaga
+- Õigete, valede ja vastamata vastuste arvestus
+- Tulemuste kuvamine (punktid, protsent, aeg)
+- Tulemuste salvestamine SQLite andmebaasi
+- Edetabel (top 5), sorteeritud:
+  1. protsendi järgi (kõrgem parem)
+  2. punktide järgi
+  3. aja järgi (kiirem parem)
 
 ## Tehnoloogiad
 
@@ -22,19 +37,17 @@ React Native / Expo viktoriinirakendus, mis kasutab Open Trivia Database API-t.
 
 ## Paigaldus ja käivitamine
 
-```bash
-npm install
-npm start
-```
-
-Platvormipõhiseks käivitamiseks:
+Installi sõltuvused:
 
 ```bash
-npm run android
-npm run ios
+npx expo start
 ```
 
-Veebis käivitamiseks on Expo veebisõltuvused (`react-dom`, `react-native-web`) samuti vajalikud.
+Seejärel:
+
+- vajutada a — käivitada Android emulatoris
+- vajutada w — avada veebis
+- skaneerida QR-koodi Expo Go rakendusega telefonis
 
 ## Projekti struktuur
 
@@ -42,6 +55,27 @@ Veebis käivitamiseks on Expo veebisõltuvused (`react-dom`, `react-native-web`)
 - `screens/SettingsScreen.tsx` — viktoriini seadete vorm.
 - `screens/QuizScreen.tsx` — küsimuste laadimine, taimer ja vastamise loogika.
 - `screens/ResultScreen.tsx` — tulemuste ja edetabeli kuvamine.
-- `services/TriviaApi.ts` — OpenTDB küsimuste päringud.
+- `services/TriviaApi.ts` — küsimuste päringud OpenTDB API-st.
 - `services/TriviaCategory.ts` — OpenTDB kategooriate päringud.
 - `database/db.ts` — SQLite tabeli loomine ja tulemuste salvestamine.
+- `components/` — korduvkasutatavad UI komponendid
+- `constants/` — värvide ja stiilide konfiguratsioon
+
+## Kasutamine
+
+1. Sisesta kasutajanimi
+2. Vali viktoriini parameetrid
+3. Vajuta "Alusta viktoriini"
+4. Vasta küsimustele enne aja lõppu
+5. Vaata tulemust ja edetabelit
+6. Vajuta "Alusta uuesti", et minna tagasi seadistuste juurde
+
+## Märkused
+
+- Kui valitud parameetritega küsimusi ei leita, kuvatakse veateade
+- Kasutaja saab sel juhul minna tagasi seadistuste ekraanile
+- Tulemused salvestatakse lokaalselt (ei kasutata serverit)
+
+## Autor
+
+Jekaterina Shashkina

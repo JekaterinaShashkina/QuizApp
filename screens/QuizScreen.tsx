@@ -205,6 +205,7 @@ export const QuizScreen = ({ settings, onBack }: QuizScreenProps) => {
         wrongAnswers={wrongAnswers}
         unansweredAnswers={unansweredAnswers}
         duration={Math.floor((Date.now() - startTime) / 1000)}
+        resultSaved={resultSaved}
         onRestart={onBack}
       />
     );

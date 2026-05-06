@@ -75,9 +75,10 @@ export const SettingsScreen = ({ onStart }: SettingsScreenProps) => {
       <TextInput
         style={styles.input}
         value={username}
-        onChangeText={setUsername}
-        placeholder="Sisesta nimi"
+        onChangeText={(text) => setUsername(text.trimStart())}
+        placeholder="Sisesta nimi (max 12t)"
         placeholderTextColor={COLORS.PLACEHOLDER}
+        maxLength={12}
       />
       <Text style={styles.label}>Küsimuste arv</Text>
       <NumberInput value={amount} onChange={setAmount} min={1} max={50} />
