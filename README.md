@@ -86,7 +86,9 @@ Seejärel:
 
 ### Vaata DEMO
 
-![Video](https://img.youtube.com/vi/KJelbHIq0yQ/0.jpg)(https://youtube.com/shorts/KJelbHIq0yQ?feature=share)
+![Video](https://img.youtube.com/vi/KJelbHIq0yQ/0.jpg)
+
+(https://youtube.com/shorts/KJelbHIq0yQ?feature=share)
 
 ## Märkused
 
